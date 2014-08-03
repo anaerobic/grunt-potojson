@@ -1,0 +1,57 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Zain\n"
+"POT-Creation-Date: 2014-08-03 02:09+0100\n"
+"PO-Revision-Date: 2014-08-03 02:18+0100\n"
+"Last-Translator: Abdessamad Idrissi <abdel@numediaweb.com>\n"
+"Language-Team: \n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.6.7\n"
+"X-Poedit-Basepath: ../../app/\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: t\n"
+"X-Poedit-SearchPath-0: scripts\n"
+"X-Poedit-SearchPathExcluded-0: scripts/languages\n"
+
+#: scripts/modules/billing/views/templates/bill-details.jade:2
+#: scripts/modules/billing/views/templates/bills.jade:2
+msgid "Monthly Charges"
+msgstr "الاقتطاعات الشهرية"
+
+#: scripts/modules/calls/views/templates/askAllow.jade:5
+msgid ""
+"Call trace is a simple tool that allows you to check your recent calls with "
+"the numbers held in your contact list."
+msgstr ""
+"تتبع الإتصال هوأداة بسيطة تسمح لك بالتحقق من مكالماتك الأخيرة مع الأرقام "
+"الموجودة في قائمة الأسماء بهاتفك"
+
+#: scripts/modules/calls/views/FilterView.coffee:31
+#, fuzzy
+msgid "Select tariffe"
+msgstr "اختر tariffe"
+
+#: scripts/modules/news/views/MainView.coffee:26
+#: scripts/modules/news/views/MainView.coffee:41
+msgid "Select news type"
+msgstr "حدد نوع الأخبار"
+
+#: scripts/modules/user/views/LoginView.coffee:56
+msgid ""
+"We cannot sign you in at the moment, please check you are connected to the "
+"Internet and try again."
+msgstr ""
+"لا يمكننا تسجيل دخولك الآن، المرجوا التاكد من انك متصل,  بشبكة الانترنت ثم "
+"اعد المحاولة."
+
+#: examples/classipress-child/index.php:7
+#, php-format
+# msgid "There are currently %s featured ad"
+# msgid_plural "There are currently %s featured ads"
+# msgstr[0] ""
+# msgstr[1] ""
