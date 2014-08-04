@@ -1,7 +1,7 @@
 {
   "name": "grunt-potojson",
   "description": "Takes a PoEdit file (*.po) and compiles it into a json object output to a js file.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/numediaweb/grunt-potojson",
   "author": {
     "name": "Abdessamad Idrissi",
@@ -32,8 +32,6 @@
     "grunt-contrib-clean": "^0.5.0",
     "grunt-contrib-nodeunit": "^0.3.3",
     "grunt": "~0.4.5",
-    "line-reader": "~0.2.4",
-    "carrier": "~0.1.14",
     "pretty-print": "~0.4.1"
   },
   "peerDependencies": {

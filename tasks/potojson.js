@@ -9,31 +9,29 @@
 'use strict';
 
 module.exports = function(grunt) {
-
-	// Please see the Grunt documentation for more information regarding task
-	// creation: http://gruntjs.com/creating-tasks
-
 	grunt.registerMultiTask('potojson', 'Takes a PoEdit file (*.po) and compiles it into a json object output to a js file.', function() {
 		// Merge task-specific and/or target-specific options with these defaults.
 		var options = this.options({
-			punctuation: '.'
+			output_header: 'module.exports = {\n',
+			output_body: '',
+			output_footer: '}',
+			output_separator: ':',
+			pretty_print: false,
+			report: false
 		});
 		var privates = {
 			output: {
 				header: [],
 				contexts: [],
 				msgid: [],
+				msgstr: [],
 				msgidplurals: [],
 				references: [],
 				flags: [],
-				msgstr: [],
 				obsoletes: [],
 				previousUntranslateds: [],
 				previousUntranslatedsPlurals: []
 			},
-			output_header: 'module.exports = {\n',
-			output_body: '',
-			output_footer: '}',
 			pattern: /^msgid|^msgstr/i,
 			pattern_msgstr: /^msgstr/i,
 			msgid_started: false,
@@ -42,17 +40,17 @@ module.exports = function(grunt) {
 		/**
 		 * Outputs a report of the translation process
 		 */
-		var printRepost = function() {
-			grunt.log.writeln('Parsed: ' + privates.output.msgid.length +
-				' msgids, ' + privates.output.msgidplurals.length +
-				' msgids-plurals, ' + privates.output.msgstr.length +
-				' msgstrs, ' + privates.output.obsoletes.length +
-				' obsoletes, ' + privates.output.contexts.length +
-				' contexts, ' + privates.output.references.length +
-				' references ' + privates.output.flags.length +
-				' flags, ' + privates.output.previousUntranslateds.length +
-				' previous untranslateds, ' + privates.output.previousUntranslatedsPlurals.length +
-				' previous untranslated-plurals');
+		var report = function() {
+			grunt.log.ok('Parse report \n================================================== \n \t' + privates.output.msgid.length +
+				' \t\tmsgids\n \t' + privates.output.msgidplurals.length +
+				' \t\tmsgids-plurals\n \t' + privates.output.msgstr.length +
+				' \t\tmsgstrs\n \t' + privates.output.obsoletes.length +
+				' \t\tobsoletes\n \t' + privates.output.contexts.length +
+				' \t\tcontexts\n \t' + privates.output.references.length +
+				' \t\treferences\n \t' + privates.output.flags.length +
+				' \t\tflags\n \t' + privates.output.previousUntranslateds.length +
+				' \t\tprevious untranslateds\n \t' + privates.output.previousUntranslatedsPlurals.length +
+				' \t\tprevious untranslated-plurals\n==================================================');
 		};
 		/**
 		 * generate output from the array
@@ -62,9 +60,11 @@ module.exports = function(grunt) {
 			privates.output.msgid.forEach(function(original_message) {
 				i++;
 				// Empty strings have nothing to do here
-				if(!original_message || /^\s*$/.test(original_message)){return;}
+				if (!original_message || /^\s*$/.test(original_message)) {
+					return;
+				}
 				//grunt.log.ok('id: ' + privates.output.msgstr[i]);
-				privates.output_body += '\t"'+original_message+'" : "'+privates.output.msgstr[i]+'"\n';
+				options.output_body += '\t"' + original_message + '" ' + options.output_separator + ' "' + privates.output.msgstr[i] + '"\n';
 
 			});
 		};
@@ -79,18 +79,15 @@ module.exports = function(grunt) {
 			return str.replace(rgx_msg, '').replace(/\\"/g, '"');
 		};
 		/**
-		 * Ported from:
+		 * Utility function to check typeof
+		 * http://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
+		 */
+		var toType = function(obj) {
+			return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
+		};
+		/**
+		 * Most of the function was ported from:
 		 * https://code.google.com/p/gettext-js/source/browse/trunk/js/gettext.js
-		 *
-		 * A typical PO file goes like:
-		 *   #: scripts/modules/payment/views/templates/credit-transfer/one.jade:15
-		 *   #, fuzzy
-		 *   msgid ""
-		 *   "this is a looooooooooooooooooooooooooooooooooooooooooooooooooooooooong "
-		 *   "automatically split line."
-		 *   msgstr ""
-		 *   "This is the translated looooooooooooooooooooooooooooooooooooooooooooong"
-		 *   "line"
 		 */
 		var parsePO = function(src) {
 			// Prepare output
@@ -107,20 +104,33 @@ module.exports = function(grunt) {
 
 			// Line feeds
 			src = grunt.util.normalizelf(src);
-			var lines = src.split(grunt.util.linefeed);
+			var lines = src.split(grunt.util.linefeed),
+				total_lines = lines.length,
+				current_line = 0;
 
 			// Loop through the lines
 			lines.forEach(function(line) {
+				// Increment the current line
+				current_line++;
+
 				// is it a comment?
 				if (line.substring(0, 1) === '#') {
-
+					// Was is a multiline msgstr?
 					if (msgstrIsEmpty) {
+
+						// Fix a bug when po edit contains an empty "msgstr" at 
+						// the begining of file.
+						if (curMsgid === 0 && privates.output.msgid[curMsgid][0] === '') {
+							return;
+						}
+
+						// Fill the stored multiline
 						privates.output.msgstr[curMsgid] = msgstrStrStore;
 
-						// Remove the msgstrIsEmpty.
+						// Remove the msgstrIsEmpty flag.
 						msgstrIsEmpty = false;
 
-						// Reset the store
+						// Reset msgstr
 						msgstrStrStore = '';
 					}
 
@@ -217,6 +227,20 @@ module.exports = function(grunt) {
 							}
 							msgstrStrStore += line.replace(/^"(.+(?="$))"$/, '$1'); // remove quotes
 							//grunt.log.ok('Untracked multiline, curMsgid ' + curMsgid + ' > ' + line.replace(/^"(.+(?="$))"$/, '$1'));
+
+							// Is this the last line? Add the last msgstr.
+							if (current_line === total_lines) {
+
+								// Fill the stored multiline
+								privates.output.msgstr[curMsgid] = msgstrStrStore;
+
+								// Remove the msgstrIsEmpty flag.
+								msgstrIsEmpty = false;
+
+								// Reset msgstr
+								msgstrStrStore = '';
+							}
+							//grunt.log.ok('total_lines = ' + total_lines + ' current_line = ' + current_line);
 						}
 
 						//grunt.log.ok('curMsgid = ' + curMsgid);
@@ -226,15 +250,23 @@ module.exports = function(grunt) {
 
 			});
 
-			var print = require('pretty-print');
-			var options = {
-				leftPadding: 2,
-				rightPadding: 3
-			};
-			//print(privates.output, options);
+			//grunt.log.ok('msgid = ' + privates.output.msgid);
+			//grunt.log.ok('msgstr = ' + privates.output.msgstr);
+
+			if (options.pretty_print) {
+				var print = require('pretty-print');
+				var print_options = {
+					leftPadding: 2,
+					rightPadding: 3
+				};
+				//print(privates.output, print_options);
+			}
+
 
 			// Print a report
-			//printRepost();
+			if (options.report) {
+				report();
+			}
 
 			return src;
 		};
@@ -271,7 +303,7 @@ module.exports = function(grunt) {
 
 			//grunt.log.writeln('Number of breaks:  ' + src.length);
 			// Write the destination file.
-			grunt.file.write(f.dest, privates.output_header + privates.output_body + privates.output_footer);
+			grunt.file.write(f.dest, options.output_header + options.output_body + options.output_footer);
 
 			// Print a success message.
 			grunt.log.ok('File "' + f.dest + '" created.');

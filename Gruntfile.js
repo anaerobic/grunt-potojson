@@ -32,10 +32,15 @@ module.exports = function(grunt) {
         potojson: {
             main: {
                 options: {
-                    punctuation: ' !!!'
+                    output_header: 'module.exports = {\n',
+                    output_body: '',
+                    output_footer: '}',
+                    output_separator: ':',
+                    pretty_print: true,
+                    report: true
                 },
                 files: {
-                    'tmp/exported.cofee': ['test/source.po']
+                    'tmp/exported.cofee': ['test/source_complex.po']
                 }
             }
         },
