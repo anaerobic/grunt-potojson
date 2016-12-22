@@ -63,9 +63,20 @@ module.exports = function(grunt) {
 				if (!original_message || /^\s*$/.test(original_message)) {
 					return;
 				}
-				//grunt.log.ok('id: ' + privates.output.msgstr[i]);
-				options.output_body += '\t"' + original_message + '" ' + options.output_separator + ' "' + privates.output.msgstr[i] + '"\n';
 
+        //options.output_body += '\t"' + original_message + '" ' + options.output_separator + ' "' + privates.output.msgstr[i] + '"\n';
+
+        var clean = function (wat) {
+          if (wat) {
+            return wat.toString().replace(/\n/g, ' ').replace(/"/g, '\\"').replace(/\\\\"/g, '\\"');
+          }
+        };
+        var watOgm = clean(original_message);
+        var watStr = clean(privates.output.msgstr[i]);
+        //grunt.log.ok('wat', privates.output.msgstr);
+        if (watOgm && watStr) {
+          options.output_body += '\t"' + watOgm + '" ' + options.output_separator + ' "' + watStr + '",\n';
+        }
 			});
 		};
 		/**
@@ -301,9 +312,13 @@ module.exports = function(grunt) {
 			// Convert output object to strings
 			generateOutput();
 
-			//grunt.log.writeln('Number of breaks:  ' + src.length);
-			// Write the destination file.
-			grunt.file.write(f.dest, options.output_header + options.output_body + options.output_footer);
+      var body = options.output_body;
+      if (body.endsWith(',\n')) {
+        body = body.substring(0, body.length - 2) + '\n';
+      }
+      //grunt.log.writeln('Number of breaks:  ' + src.length);
+      // Write the destination file.
+      grunt.file.write(f.dest, options.output_header + body + options.output_footer);
 
 			// Print a success message.
 			grunt.log.ok('File "' + f.dest + '" created.');
